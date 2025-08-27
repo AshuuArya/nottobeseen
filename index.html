@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My M</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        /* --- General Styling --- */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden; /* Prevent scrollbars */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size: 24px;"><text y="24" fill="white">✨</text></svg>') 16 16, auto;
+        }
+        .dancing-script {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* --- Dynamic Background --- */
+        .love-container {
+            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e, #2e1c1d, #352c32);
+            background-size: 400% 400%;
+            position: relative;
+            animation: animateBackground 20s ease infinite;
+        }
+
+        @keyframes animateBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- Star Animations --- */
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* --- Falling Star Game Element --- */
+        .falling-star {
+            position: absolute;
+            top: -50px; /* Start off-screen */
+            color: #fff700;
+            font-size: 30px;
+            text-shadow: 0 0 10px #fff700, 0 0 20px #fff700;
+            animation: fall linear forwards;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh);
+            }
+        }
+        
+        /* --- Heart Burst Effect --- */
+        .heart-particle {
+            position: absolute;
+            background: red;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            opacity: 1;
+            animation: burst 0.8s ease-out forwards;
+            z-index: 20;
+        }
+        .heart-particle::before, .heart-particle::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+        }
+        .heart-particle::before { top: -5px; left: 0; }
+        .heart-particle::after { top: 0; left: 5px; }
+
+        @keyframes burst {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0) translateY(40px); opacity: 0; }
+        }
+
+        /* --- Love Message Styling --- */
+        .love-note {
+            position: absolute;
+            color: white;
+            font-size: 1.2rem;
+            padding: 5px 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            animation: fade-in-out 2.5s ease-in-out forwards;
+            z-index: 20;
+            text-align: center;
+        }
+
+        @keyframes fade-in-out {
+            0%, 100% { opacity: 0; transform: translateY(0); }
+            20%, 80% { opacity: 1; transform: translateY(-10px); }
+        }
+
+        /* --- Intro Text Animation --- */
+        .intro-text {
+            animation: fadeIn 3s ease-out 1s forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="love-container w-full h-screen flex items-center justify-center">
+
+    <!-- This div will hold all the stars for the background -->
+    <div id="star-container" class="absolute top-0 left-0 w-full h-full"></div>
+    
+    <!-- This div will hold the falling stars for the game -->
+    <div id="game-container" class="absolute top-0 left-0 w-full h-full"></div>
+
+    <!-- Main message area -->
+    <div class="text-center text-white p-8 rounded-lg z-10">
+        <h1 class="dancing-script text-6xl md:text-8xl font-bold intro-text">For My Dearest M</h1>
+        <p class="text-lg md:text-2xl mt-4 intro-text" style="animation-delay: 2s;">Catch the stars to see my love...</p>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const STAR_COUNT = 150; // Number of stars in the background
+        const GAME_INTERVAL = 2000; // Time in ms between falling stars
+        const LOVE_MESSAGES = [
+            "You're my universe.",
+            "I love you to the stars and back.",
+            "You shine brighter than any star.",
+            "My wish came true with you.",
+            "We were written in the stars.",
+            "You are my everything.",
+            "My love for you is infinite."
+        ];
+
+        // --- DOM Elements ---
+        const starContainer = document.getElementById('star-container');
+        const gameContainer = document.getElementById('game-container');
+
+        // --- Functions ---
+
+        /**
+         * Creates a single background star and adds it to the container.
+         */
+        function createBackgroundStar() {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            const size = Math.random() * 3 + 1; // Star size between 1px and 4px
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 2}s`;
+            star.style.animationDuration = `${Math.random() * 2 + 2}s`; // Slower twinkle for some
+            starContainer.appendChild(star);
+        }
+
+        /**
+         * Creates a falling star for the game.
+         */
+        function createFallingStar() {
+            const star = document.createElement('div');
+            star.classList.add('falling-star');
+            star.innerHTML = '★';
+            star.style.left = `${Math.random() * 90 + 5}%`; // Avoid edges
+            const duration = Math.random() * 5 + 5; // Fall duration 5-10s
+            star.style.animationDuration = `${duration}s`;
+
+            star.addEventListener('click', (e) => {
+                // Stop the star from being removed immediately
+                e.stopPropagation(); 
+                catchStar(star);
+            }, { once: true });
+
+            gameContainer.appendChild(star);
+
+            // Remove the star if it's not clicked
+            setTimeout(() => {
+                if (star.parentElement) {
+                    star.remove();
+                }
+            }, duration * 1000);
+        }
+
+        /**
+         * Handles the logic when a star is caught.
+         * @param {HTMLElement} star - The star element that was clicked.
+         */
+        function catchStar(star) {
+            const rect = star.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+
+            // Create a burst of hearts
+            for (let i = 0; i < 15; i++) {
+                createHeartParticle(x, y);
+            }
+
+            // Show a random love message
+            showLoveNote(x, y);
+
+            // Remove the caught star
+            star.remove();
+        }
+
+        /**
+         * Creates a single heart particle for the burst effect.
+         * @param {number} x - The horizontal position for the burst.
+         * @param {number} y - The vertical position for the burst.
+         */
+        function createHeartParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.classList.add('heart-particle');
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            
+            // Random direction for the burst
+            const angle = Math.random() * Math.PI * 2;
+            const distance = Math.random() * 50 + 20;
+            const transformX = Math.cos(angle) * distance;
+            const transformY = Math.sin(angle) * distance;
+
+            // We need to set the final transform in the keyframes, not here.
+            // A dynamic keyframe is the best way.
+            const animationName = `burst-${Date.now()}-${Math.random()}`;
+            const styleSheet = document.createElement("style");
+            styleSheet.innerText = `
+                @keyframes ${animationName} {
+                    0% { transform: translate(0, 0) rotate(-45deg); opacity: 1; }
+                    100% { transform: translate(${transformX}px, ${transformY}px) rotate(-45deg); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(styleSheet);
+            particle.style.animation = `${animationName} 0.8s ease-out forwards`;
+            
+            document.body.appendChild(particle);
+            setTimeout(() => {
+                particle.remove();
+                styleSheet.remove();
+            }, 800);
+        }
+
+        /**
+         * Displays a random love message at the specified coordinates.
+         * @param {number} x - The horizontal position for the message.
+         * @param {number} y - The vertical position for the message.
+         */
+        function showLoveNote(x, y) {
+            const note = document.createElement('div');
+            note.classList.add('love-note');
+            const randomIndex = Math.floor(Math.random() * LOVE_MESSAGES.length);
+            note.textContent = LOVE_MESSAGES[randomIndex];
+            note.style.left = `${x}px`;
+            note.style.top = `${y}px`;
+            // Center the note on the click position
+            note.style.transform = 'translate(-50%, -50%)';
+            
+            document.body.appendChild(note);
+            setTimeout(() => note.remove(), 2500);
+        }
+
+
+        // --- Initializers ---
+
+        // Create the starry background
+        for (let i = 0; i < STAR_COUNT; i++) {
+            createBackgroundStar();
+        }
+
+        // Start the game loop for falling stars
+        setInterval(createFallingStar, GAME_INTERVAL);
+    </script>
+</body>
+</html>
